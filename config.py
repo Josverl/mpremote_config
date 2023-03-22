@@ -1,9 +1,8 @@
 from pathlib import Path
 
-
 commands = {
     "list": {
-        "command": "devs",
+        "command": ["connect","list"],
         "help": "List serial devices",
     },
     "run script='main.py'": {
@@ -27,7 +26,7 @@ commands = {
     },
 }
 
-# register com ports in poth upper and lower case
+# register com ports in both upper and lower case
 for port_num in range(1,30):
     prefix, port = ("com", "COM")
     commands["{}{}".format(prefix, port_num)] = {
@@ -48,7 +47,8 @@ for file in files:
         help = f.readline()
     if help[0] in ("#", '"'):
         help = help[1:].strip().strip('"').strip()
-        help = f"{help} - {file.absolute()}"
+        # help = f"{help} - {file.absolute()}"
+        help = f"{help} - {file.relative_to(here)}"
     else:
         help = file.absolute()
     commands[file.stem] = {
