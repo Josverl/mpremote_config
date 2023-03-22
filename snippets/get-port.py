@@ -17,7 +17,6 @@ def _info():  # type:() -> dict[str, str]
             "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
             "build": "",
-            # "board_d": "",
             "cpu": "",
             "mpy": "",
             "arch": "",
@@ -45,7 +44,6 @@ def _info():  # type:() -> dict[str, str]
     try:
         # look up the board name in the board_info.csv file
         b = info["board"].strip()
-        print(f"board: '{b}'")
         with open("board_info.csv", "r") as f:
             if not find_board(info, b, f):
                 if "with" in b:
@@ -73,9 +71,7 @@ def _info():  # type:() -> dict[str, str]
     for mod_name, mod_thing in [("pycopy", "const"), ("pycom", "FAT")]:
         try:  # families
             _t = __import__(mod_name, None, None, (mod_thing))
-            # from pycopy import const as _t  # type: ignore
-
-            info["family"] = "pycopy"
+            info["family"] = mod_name
             del _t
         except (ImportError, KeyError):
             pass
@@ -107,7 +103,7 @@ def _info():  # type:() -> dict[str, str]
             "xtensawin",
         ][sys_mpy >> 10]
         if arch:
-            info["arch"] = arch            
+            info["arch"] = arch
     return info
 
 
