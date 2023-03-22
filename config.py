@@ -9,21 +9,10 @@ commands = {
         "command": ["exec", "exec( open(script).read() , globals() )"],
         "help": "Run a script on the remote device",
     },
-    "format": {
-        "command": [
-            "exec",
-            "--no-follow" "import os, machine; os.umount('/'); os.VfsLfs2.mkfs(bdev); os.mount(bdev, '/'); machine.reset()",
-        ],
-        "help": "Format the device",
-    },
-    "unsafe": {
-        "command": [
-            "exec",
-            "--no-follow" "{{import random}}",
-            "import os, machine; os.umount('/'); os.VfsLfs2.mkfs(bdev); os.mount(bdev, '/'); machine.reset()",
-        ],
-        "help": "Format the device",
-    },
+    "md": {"command": "mkdir", "help": "alias for mkdir" },
+    "del": {"command": "rm", "help": "alias for rm" },
+    "dir": {"command": "ls", "help": "alias for ls" },
+    "copy": {"command": "cp", "help": "alias for cp" },
 }
 
 # register com ports in both upper and lower case
