@@ -5,4 +5,5 @@
 - adds COM4: .. COM30: to simplify connection to multiple boards
 - adds all scripts in the snippets folder as commands
 
-- `mpremote COM7 get-port` 
+- list all commands and scripts using `mpremote help`
+ 

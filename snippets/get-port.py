@@ -1,4 +1,4 @@
-"stubber: get-port"
+"stubber: get-port and board info "
 import gc
 import os
 import sys

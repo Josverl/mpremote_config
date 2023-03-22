@@ -20,12 +20,12 @@ for port_num in range(1,30):
     prefix, port = ("com", "COM")
     commands["{}{}".format(prefix, port_num)] = {
         "command": "connect {}{}".format(port, port_num),
-        "help": 'connect to serial port "{}{}:"'.format(port, port_num),
+        "help": 'connect to serial port {}{}:'.format(port, port_num),
     }
     prefix, port = ("COM", "COM")
     commands["{}{}".format(prefix, port_num)] = {
         "command": "connect {}{}".format(port, port_num),
-        "help": 'connect to serial port "{}{}:"'.format(port, port_num),
+        "help": 'connect to serial port {}{}:'.format(port, port_num),
     }
 
 here  = Path(__file__).parent.absolute()
