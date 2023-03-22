@@ -16,10 +16,11 @@ def _info():  # type:() -> dict[str, str]
             "version": "",
             "port": "stm32" if sys.platform.startswith("pyb") else sys.platform,  # port: esp32 / win32 / linux / stm32
             "board": "GENERIC",
-            "cpu": "",
             "build": "",
-            "board_d": "",
+            # "board_d": "",
+            "cpu": "",
             "mpy": "",
+            "arch": "",
         }
     )
     try:
@@ -88,6 +89,25 @@ def _info():  # type:() -> dict[str, str]
         ):
             # drop the .0 for newer releases
             info["version"] = info["version"][:-2]
+
+    # spell-checker: disable
+    if "mpy" in info:  # mpy on some v1.11+ builds
+        sys_mpy = int(info["mpy"])
+        arch = [
+            None,
+            "x86",
+            "x64",
+            "armv6",
+            "armv6m",
+            "armv7m",
+            "armv7em",
+            "armv7emsp",
+            "armv7emdp",
+            "xtensa",
+            "xtensawin",
+        ][sys_mpy >> 10]
+        if arch:
+            info["arch"] = arch            
     return info
 
 
@@ -95,9 +115,8 @@ def find_board(info, board_descr, f):
     for line in f:
         descr_, board_ = line.split(",")[0].strip(), line.split(",")[1].strip()
         if descr_ == board_descr:
-            # print(line)
-            info["board_d"] = descr_
             info["board"] = board_
+            # info["board_d"] = descr_
             return True
     return False
 
