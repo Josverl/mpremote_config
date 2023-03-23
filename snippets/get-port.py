@@ -50,8 +50,7 @@ def _info():  # type:() -> dict[str, str]
                     f.seek(0)
                     b = b.split("with")[0].strip()
                     find_board(info, b, f)
-
-        # info["board"] = info["board"].replace(" ", "_")
+        info["board"] = info["board"].replace(" ", "_")
     except (AttributeError, IndexError, OSError):
         pass
     gc.collect()
@@ -89,6 +88,7 @@ def _info():  # type:() -> dict[str, str]
     # spell-checker: disable
     if "mpy" in info:  # mpy on some v1.11+ builds
         sys_mpy = int(info["mpy"])
+        # .mpy architecture
         arch = [
             None,
             "x86",
@@ -104,6 +104,8 @@ def _info():  # type:() -> dict[str, str]
         ][sys_mpy >> 10]
         if arch:
             info["arch"] = arch
+        # .mpy version.minor
+        info["mpy"] = "v{}.{}".format(sys_mpy & 0xff, sys_mpy >> 8 & 3)
     return info
 
 
