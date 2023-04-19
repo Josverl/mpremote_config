@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 commands = {
@@ -15,18 +16,19 @@ commands = {
     "copy": {"command": "cp", "help": "alias for cp"},
 }
 
-# register com ports in both upper and lower case
-for port_num in range(1, 30):
-    prefix, port = ("com", "COM")
-    commands["{}{}".format(prefix, port_num)] = {
-        "command": "connect {}{}".format(port, port_num),
-        "help": "connect to serial port {}{}:".format(port, port_num),
-    }
-    prefix, port = ("COM", "COM")
-    commands["{}{}".format(prefix, port_num)] = {
-        "command": "connect {}{}".format(port, port_num),
-        "help": "connect to serial port {}{}:".format(port, port_num),
-    }
+# register COM ports in both upper and lower case
+if os.name == "nt":
+    for port_num in range(1, 30):
+        prefix, port = ("com", "COM")
+        commands["{}{}".format(prefix, port_num)] = {
+            "command": "connect {}{}".format(port, port_num),
+            "help": "connect to serial port {}{}:".format(port, port_num),
+        }
+        prefix, port = ("COM", "COM")
+        commands["{}{}".format(prefix, port_num)] = {
+            "command": "connect {}{}".format(port, port_num),
+            "help": "connect to serial port {}{}:".format(port, port_num),
+        }
 
 here = Path(__file__).parent.absolute()
 
