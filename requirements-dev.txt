@@ -1,0 +1,4 @@
+# optionally micropython stubs intalled in the typings folder or into a .venv 
+# pip install -t typings -r requirements-dev.txt --no-user
+
+micropython-esp32-stubs
