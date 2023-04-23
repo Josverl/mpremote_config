@@ -6,8 +6,7 @@ import utime
 wlan = network.WLAN(network.STA_IF)
 # wlan.config(dhcp_hostname="foo-bar-baz")
 wlan.active(True)
-# wlan.connect("IoT", "MicroPython")
-wlan.connect("AtticWare", "!!DAF66!!")
+wlan.connect("IoT", "MicroPython")
 
 # Note that this may take some time, so we need to wait
 # Wait 5 sec or until connected

@@ -1,5 +1,6 @@
-# command = "wipe_folder folder='/'"
+# command = "wipe_folder" , or exec "folder='/foobar'" wipe_folder
 # Clean all files from flash ,use with care ; there is no undo or trashcan 
+# todo: integrate with the way mpremote handles parameters.
 import uos as os
 
 if not folder: # Default to root # type: ignore
