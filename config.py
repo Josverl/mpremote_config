@@ -35,8 +35,7 @@ if os.name == "nt":
             "help": "connect to serial port {}{}:".format(port, port_num),
         }
 
-here = Path(__file__).parent.absolute()
-
+here = Path(os.getcwd())
 files = (here / "snippets").glob("*.py")
 for file in files:
     try:
