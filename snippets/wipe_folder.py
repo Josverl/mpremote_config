@@ -3,7 +3,7 @@
 # todo: integrate with the way mpremote handles parameters.
 import uos as os
 
-if not folder: # Default to root # type: ignore
+if 'folder' not in globals():
     folder = '/'
 
 
