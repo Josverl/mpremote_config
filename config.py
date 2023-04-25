@@ -1,3 +1,8 @@
+"""\
+mpremote configuration file that defines a custom configuration for mpremote.
+- add a few handly commands that are coded in the first part of this file 
+- reads additional scripts from the snippets folder and adds them as individual commands to mpremote.
+"""
 import os
 from pathlib import Path
 
