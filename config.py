@@ -46,8 +46,8 @@ for file in files:
         continue
     if help[0] in ("#", '"'):
         help = help[1:].strip().strip('"').strip()
-        # help = f"{help} - {file.absolute()}"
-        help = f"{help} - {file.relative_to(here)}"
+        help = f"{help}\n{file.absolute()}"
+        # help = f"{help}\n - {file.relative_to(here)}"
     else:
         help = ""
     command = file.stem
