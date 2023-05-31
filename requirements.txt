@@ -1,4 +1,3 @@
 
-# version of mpremote newer that 0.4.0 
-git+https://github.com/Josverl/mpremote.git@main#subdirectory=tools/mpremote 
+
 
