@@ -3,6 +3,7 @@ mpremote configuration file that defines a custom configuration for mpremote.
 - add a few handly commands that are coded in the first part of this file 
 - reads additional scripts from the snippets folder and adds them as individual commands to mpremote.
 """
+
 import os
 from pathlib import Path
 
@@ -11,7 +12,7 @@ commands = {
         "command": ["connect", "list"],
         "help": "List serial devices",
     },
-    "run script='main.py'": {
+    "xrun script='main.py'": {
         "command": ["exec", "exec( open(script).read() , globals() )"],
         "help": "Run a script on the remote device",
     },
@@ -25,14 +26,14 @@ commands = {
 if os.name == "nt":
     for port_num in range(1, 30):
         prefix, port = ("com", "COM")
-        commands["{}{}".format(prefix, port_num)] = {
-            "command": "connect {}{}".format(port, port_num),
-            "help": "connect to serial port {}{}:".format(port, port_num),
+        commands[f"{prefix}{port_num}"] = {
+            "command": f"connect {port}{port_num}",
+            "help": f"connect to serial port {port}{port_num}:",
         }
         prefix, port = ("COM", "COM")
-        commands["{}{}".format(prefix, port_num)] = {
-            "command": "connect {}{}".format(port, port_num),
-            "help": "connect to serial port {}{}:".format(port, port_num),
+        commands[f"{prefix}{port_num}"] = {
+            "command": f"connect {port}{port_num}",
+            "help": f"connect to serial port {port}{port_num}:",
         }
 
 here = Path(os.getcwd())
