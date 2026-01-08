@@ -1,151 +1,156 @@
 "stubber: extract the MCU hardware and firmware information across different families and firmwares and devices"
+
 import os
 import sys
-if 1:
+
+
+def _build(s):
+    # extract build from sys.version or os.uname().version if available
+    # sys.version: 'MicroPython v1.23.0-preview.6.g3d0b6276f'
+    # sys.implementation.version: 'v1.13-103-gb137d064e'
+    if not s:
+        return ""
+    s = s.split(" on ", 1)[0] if " on " in s else s
+    if s.startswith("v"):
+        if not "-" in s:
+            return ""
+        b = s.split("-")[1]
+        return b
+    if not "-preview" in s:
+        return ""
+    b = s.split("-preview")[1].split(".")[1]
+    return b
+
+
+def _version_str(version: tuple):  #  -> str:
+    v_str = ".".join([str(n) for n in version[:3]])
+    if len(version) > 3 and version[3]:
+        v_str += "-" + version[3]
+    return v_str
+
+
+def _info():  # type:() -> dict[str, str]
+    # sourcery skip: use-contextlib-suppress, use-fstring-for-formatting, use-named-expression
+    info = dict(
+        {
+            "family": sys.implementation[0],  # type: ignore
+            "version": "",
+            "build": "",
+            "ver": "",
+            "port": "stm32"
+            if sys.platform.startswith("pyb")
+            else sys.platform,  # port: esp32 / win32 / linux / stm32
+            "board": "GENERIC",
+            "cpu": "",
+            "mpy": "",
+            "arch": "",
+        }
+    )
     try:
-        print(sys.platform ) # 'samd'
-        print(sys.version) #'3.4.0; MicroPython v1.19.1-705-gac5934c96 on 2022-11-18
-        build = sys.version.split(';')[1].strip().split(' ')[1].split('-')[1]
-        print(build)
-        print(sys.implementation) # (name='micropython', version=(1, 19, 1), _machine='Wio Terminal D51R with SAMD51P19A', _mpy=7430)
-        print(os.uname()) # (sysname='esp32', nodename='esp32', release='1.19.1', version='v1.19.1 on 2022-06-18', machine='ESP32 module (spiram) with ESP32')
-    except:
+        info["version"] = _version_str(sys.implementation.version)
+    except AttributeError:
         pass
     try:
-        import platform
-        print(platform.platform() ) # MicroPython-1.19.1-xtensa-IDFv4.2.2-with-newlib3.0.0
-        print(platform.libc_ver()) # ('newlib', '3.0.0')
-        print(platform.python_compiler()) # GCC 8.4.0
-    except:
+        machine = (
+            sys.implementation._machine
+            if "_machine" in dir(sys.implementation)
+            else os.uname().machine
+        )
+        info["board"] = machine.strip()
+        info["cpu"] = machine.split("with")[-1].strip() if "with" in machine else ""
+        info["mpy"] = (
+            sys.implementation._mpy
+            if "_mpy" in dir(sys.implementation)
+            else sys.implementation.mpy
+            if "mpy" in dir(sys.implementation)
+            else ""
+        )
+    except (AttributeError, IndexError):
         pass
 
-print("--------------------------------------------------")
-
-_n = sys.implementation.name  # type: ignore
-_p = sys.platform if not sys.platform.startswith("pyb") else "stm32"
-info = {
-    "name": _n,  # - micropython
-    "release": "0.0.0",  # mpy semver from sys.implementation or os.uname()release
-    "version": "0.0.0",  # major.minor.0
-    "build": "",  # parsed from version
-    "sysname": "unknown",  # esp32
-    # "nodename": "unknown",  # ! not on all builds
-    "machine": "unknown",  # ! not on all builds
-    "family": _n,  # fw families, micropython , pycopy , lobo , pycom
-    "platform": _p,  # port: esp32 / win32 / linux
-    "port": _p,  # port: esp32 / win32 / linux
-    "ver": "",  # short version
-}
-try:
-    info["version"] = ".".join([str(n) for n in sys.implementation.version])
-    info["release"] = info["version"]
-    info["name"] = sys.implementation.name
-    if '_machine' in dir(sys.implementation):
-        info["machine"] = sys.implementation._machine  # type: ignore
-    if '_mpy' in dir(sys.implementation):
-        info["mpy"] = sys.implementation._mpy  # type: ignore
-    if 'mpy' in dir(sys.implementation):
-        info["mpy"] = sys.implementation.mpy  # type: ignore
-except AttributeError:
-    pass
-
-try:
-    info["mpy"] = sys.implementation._mpy  # type: ignore
-except AttributeError:
-    pass
-
-if sys.platform not in ("unix", "win32"):
     try:
-        u = os.uname()
-        info["sysname"] = u.sysname
-        # info["nodename"] = u.nodename
-        info["release"] = u.release
-        if info["machine"] == "":
-            info["machine"] = u.machine
-        # parse micropython build info
-        if " on " in u.version:
-            s = u.version.split(" on ")[0]
-            if info["sysname"] == "esp8266":
-                # esp8266 has no usable info on the release
-                if "-" in s:
-                    v = s.split("-")[0]
-                else:
-                    v = s
-                info["version"] = info["release"] = v.lstrip("v")
-            try:
-                info["build"] = s.split("-")[1]
-            except IndexError:
-                pass
-    except (IndexError, AttributeError, TypeError):
+        if hasattr(sys, "version"):
+            info["build"] = _build(sys.version)
+        elif hasattr(os, "uname"):
+            info["build"] = _build(os.uname()[3])
+            if not info["build"]:
+                # extract build from uname().release if available
+                info["build"] = _build(os.uname()[2])
+    except (AttributeError, IndexError):
         pass
+    # avoid  build hashes
+    if info["build"] and len(info["build"]) > 5:
+        info["build"] = ""
 
-try:  # families
-    from pycopy import const as _t  # type: ignore
+    if info["version"] == "" and sys.platform not in ("unix", "win32"):
+        try:
+            u = os.uname()
+            info["version"] = u.release
+        except (IndexError, AttributeError, TypeError):
+            pass
+    # detect families
+    for fam_name, mod_name, mod_thing in [
+        ("pycopy", "pycopy", "const"),
+        ("pycom", "pycom", "FAT"),
+        ("ev3-pybricks", "pybricks.hubs", "EV3Brick"),
+    ]:
+        try:
+            _t = __import__(mod_name, None, None, (mod_thing))
+            info["family"] = fam_name
+            del _t
+            break
+        except (ImportError, KeyError):
+            pass
 
-    info["family"] = "pycopy"
-    del _t
-except (ImportError, KeyError):
-    pass
-try:  # families
-    from pycom import FAT as _t  # type: ignore
-
-    info["family"] = "pycom"
-    del _t
-except (ImportError, KeyError):
-    pass
-if info["platform"] == "esp32_LoBo":
-    info["family"] = "loboris"
-    info["port"] = "esp32"
-elif info["sysname"] == "ev3":
-    # ev3 pybricks
-    info["family"] = "ev3-pybricks"
-    info["release"] = "1.0.0"
-    try:
-        # Version 2.0 introduces the EV3Brick() class.
-        from pybricks.hubs import EV3Brick  # type: ignore
-
+    if info["family"] == "ev3-pybricks":
         info["release"] = "2.0.0"
-    except ImportError:
-        pass
 
-# version info
-if info["release"]:
-    info["ver"] = "v" + info["release"].lstrip("v")
-if info["family"] == "micropython":
-    if (
-        info["release"]
-        and info["release"] >= "1.10.0"
-        and info["release"].endswith(".0")
-    ):
-        # drop the .0 for newer releases
-        info["ver"] = info["release"][:-2]
-    else:
-        info["ver"] = info["release"]
-    # add the build nr, but avoid a git commit-id
-    if info["build"] != "" and len(info["build"]) < 4:
-        info["ver"] += "-" + info["build"]
-if info["ver"][0] != "v":
-    info["ver"] = "v" + info["ver"]
-# spell-checker: disable
-if "mpy" in info:  # mpy on some v1.11+ builds
-    sys_mpy = int(info["mpy"])
-    arch = [
-        None,
-        "x86",
-        "x64",
-        "armv6",
-        "armv6m",
-        "armv7m",
-        "armv7em",
-        "armv7emsp",
-        "armv7emdp",
-        "xtensa",
-        "xtensawin",
-    ][sys_mpy >> 10]
-    if arch:
-        info["arch"] = arch
+    if info["family"] == "micropython":
+        if (
+            info["version"]
+            and info["version"].endswith(".0")
+            and info["version"]
+            >= "1.10.0"  # versions from 1.10.0 to 1.20.0 do not have a micro .0
+            and info["version"] <= "1.19.9"
+        ):
+            # drop the .0 for newer releases
+            info["version"] = info["version"][:-2]
+
+    # spell-checker: disable
+    if "mpy" in info and info["mpy"]:  # mpy on some v1.11+ builds
+        sys_mpy = int(info["mpy"])
+        # .mpy architecture
+        try:
+            arch = [
+                None,
+                "x86",
+                "x64",
+                "armv6",
+                "armv6m",
+                "armv7m",
+                "armv7em",
+                "armv7emsp",
+                "armv7emdp",
+                "xtensa",
+                "xtensawin",
+                "rv32imc",
+            ][sys_mpy >> 10]
+            if arch:
+                info["arch"] = arch
+        except IndexError:
+            info["arch"] = "unknown"
+
+        # .mpy version.minor
+        info["mpy"] = "v{}.{}".format(sys_mpy & 0xFF, sys_mpy >> 8 & 3)
+    # simple to use version[-build] string avoiding f-strings for backward compat
+    info["ver"] = (
+        "v{version}-{build}".format(version=info["version"], build=info["build"])
+        if info["build"]
+        else "v{version}".format(version=info["version"])
+    )
+
+    return info
 
 
-print('=========================================')
-print(repr(info))
-print('=========================================')
+print(_info())
+del _info, _build, _version_str

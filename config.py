@@ -1,6 +1,6 @@
 """\
 mpremote configuration file that defines a custom configuration for mpremote.
-- add a few handly commands that are coded in the first part of this file 
+- add a few handy commands that are coded in the first part of this file 
 - reads additional scripts from the snippets folder and adds them as individual commands to mpremote.
 """
 
@@ -12,7 +12,7 @@ commands = {
         "command": ["connect", "list"],
         "help": "List serial devices",
     },
-    "xrun script='main.py'": {
+    "rrun script='main.py'": {
         "command": ["exec", "exec( open(script).read() , globals() )"],
         "help": "Run a script on the remote device",
     },
@@ -20,7 +20,25 @@ commands = {
     "del": {"command": "rm", "help": "alias for rm"},
     "dir": {"command": "ls", "help": "alias for ls"},
     "copy": {"command": "cp", "help": "alias for cp"},
+    "rfc2217": {
+        "command": ["connect", "rfc2217://localhost:2217"],
+        "help": "connect to rfc2217://localhost:2217",
+    },
+    "s2218": {
+        "command": ["connect", "socket://localhost:2218"],
+        "help": "connect to socket://localhost:2218",
+    },
+    "unix": {
+        "command": ["connect", "socket://localhost:2218"],
+        "help": "connect to socket://localhost:2218",
+    },
 }
+
+# esp_detection = [
+#     # chipset , VID, PID, Vendor
+#     ("CP2102 / CP2104", 0x10C4, 0xEA60, "Silicon Labs"),
+#     (2, 0xFFFFF, 0xFFFFF, "Unknown"),
+# ]
 
 # register COM ports in both upper and lower case
 if os.name == "nt":
@@ -52,14 +70,14 @@ for file in files:
     else:
         help = ""
     command = file.stem
-    # BUG: Quote handling from commandline --> mpremote.main:do_command_expansion(args): prevents handling string parameters 
-    # if command == "wipe_folder":
-    #     command = "wipe_folder folder='/'"
-    # if params[0] not in ("#", '"') and '=' in params:
-    #     params = params.strip()
-    #     command += f" {params}"
 
     commands[command] = {
         "command": ["exec", file.read_text()],
         "help": help,
     }
+
+# clean up unneeded variables
+try:
+    del here, files, file, help, command, f, os, params, prefix, port, port_num
+except NameError:
+    pass

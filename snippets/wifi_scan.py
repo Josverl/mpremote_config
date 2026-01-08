@@ -24,11 +24,7 @@ wlan.status()
 
 
 def _authmode(mode: int):
-    try:
-        return AUTH_MODES[mode]
-    except KeyError:
-        # handle unknown modes
-        return "mode-{}".format(mode)
+    return AUTH_MODES.get(mode, f"AUTH-{mode}")
 
 
 def _hidden(net: tuple):
