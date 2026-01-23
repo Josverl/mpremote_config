@@ -76,8 +76,8 @@ for file in files:
         "help": help,
     }
 
-# clean up unneeded variables
-try:
-    del here, files, file, help, command, f, os, params, prefix, port, port_num
-except NameError:
-    pass
+# # clean up unneeded variables
+# try:
+#     del here, files, file, help, command, f, os, params, prefix, port, port_num  # type : ignore
+# except NameError:
+#     pass
