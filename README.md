@@ -2,8 +2,6 @@
 
 [mpremote](https://docs.micropython.org/en/latest/reference/mpremote.html) configuration and script snippets that can be executed simply
 
-Note that this configuration has a dependency on a [pre-release fork](https://github.com/Josverl/mpremote) of mpremote to make the mpremote configuration work on Windows at all, and to pass the location of the configuration file in the `__file__` variable. 
-
 - config.py
   Adds a simple mechanism to create additional `mpremote` commands by just creating a `my_command.py` script in the `./snippets` folder.
   These then can be executed by running `mpremote my_command` referencing a file `my_command`
